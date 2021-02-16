@@ -1,0 +1,7 @@
+{
+  "name": "bloggy",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue"
+}
