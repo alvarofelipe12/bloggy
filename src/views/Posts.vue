@@ -2,21 +2,28 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-title>BLOGGY 😃</ion-title>
+        <ion-title class="ion-text-center">BLOGGY 😃</ion-title>
       </ion-toolbar>
     </ion-header>
-    <ion-content :fullscreen="true">
-      <ion-header collapse="condense">
-        <ion-toolbar> <ion-title size="large">Posts</ion-title> </ion-toolbar>Î
-      </ion-header>
+    <ion-spinner
+      name="bubbles"
+      v-if="!posts.list || posts.list.length === 0"
+    ></ion-spinner>
+    <ion-content :fullscreen="true" v-else-if="posts.list && posts.list.length > 0">
       <ion-grid>
-        <ion-row>
+        <ion-row v-for="item in posts.list" :key="item.id">
           <ion-col class="ion-padding">
-            <h1>{{ title }}</h1>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Earum
-            minima cupiditate non neque debitis harum dolorem distinctio, minus
-            esse blanditiis asperiores ipsum tempore amet ab quibusdam fugiat
-            quaerat, facere aut!
+            <ion-item
+              detail
+              @click="() => router.push(`/post-detail/${item.id}`)"
+            >
+              <ion-label class="ion-text-wrap">
+                <ion-text color="secondary">
+                  <h2>{{ item.title }}</h2>
+                </ion-text>
+                <p>{{ item.body }}</p>
+              </ion-label>
+            </ion-item>
           </ion-col>
         </ion-row>
       </ion-grid>
@@ -25,11 +32,10 @@
         inset="true"
         lines="inset"
       >
-        <ion-card v-for="item in posts.list" :key="item.id">
+        <ion-card>
           <ion-item>
-            <ion-label>
-              <h2>{{ item.title }}</h2>
-              <p>{{ item.body }}</p>
+            <ion-label class="ion-text-wrap">
+              <!-- Put comments here -->
             </ion-label>
           </ion-item>
         </ion-card>
@@ -55,8 +61,10 @@ import {
   IonGrid,
   IonRow,
   IonCol,
+  IonText,
 } from "@ionic/vue";
-import { ref, reactive, defineComponent } from "vue";
+import { defineComponent } from "vue";
+import { useRouter } from "vue-router";
 
 export default defineComponent({
   name: "Posts",
@@ -73,39 +81,32 @@ export default defineComponent({
     IonGrid,
     IonRow,
     IonCol,
+    IonText,
   },
   data() {
-    const posts = reactive({
+    const posts = {
       list: [],
       error: {},
-    });
+    };
+    const title = "Blog Entry";
     return {
       posts,
-      title: "Blog Entry",
+      title,
     };
   },
   methods: {
-    async submitted(): Promise<void> {
-      try {
-        const response = await fetch(
-          `https://jsonplaceholder.typicode.com/posts`
-        );
-        const json = await response.json();
-        this.posts.list = ref(json);
-      } catch (error) {
-        this.posts.error = { error };
-      } finally {
-        // do something else
-      }
-      return;
+    submitted() {
+      fetch("https://jsonplaceholder.typicode.com/posts")
+        .then((response) => response.json())
+        .then((json) => (this.posts.list = json));
     },
   },
   created() {
-    // fetch("https://jsonplaceholder.typicode.com/posts").then(list => {
-    //   console.log("Component has been created!");
-    //   this.posts.list = list as any;
-    // });
     this.submitted();
+  },
+  setup() {
+    const router = useRouter();
+    return { router };
   },
 });
 </script>
